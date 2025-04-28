@@ -1,4 +1,4 @@
-CLASS zcl_work_oder_validator_as DEFINITION
+CLASS zcl_work_order_validator_as DEFINITION
   PUBLIC
   FINAL
   CREATE PUBLIC .
@@ -21,33 +21,36 @@ CLASS zcl_work_oder_validator_as DEFINITION
                                    RETURNING VALUE(rv_valid) TYPE abap_bool.
   PROTECTED SECTION.
   PRIVATE SECTION.
-    CONSTANTS: c_valid_status   TYPE string VALUE 'PE CO', " Example statuses: Pending, Completed
-               c_valid_priority TYPE string VALUE 'A B'. " Example priorities: High,Low
     DATA lv_code TYPE string.
-    METHODS:
-      check_customer_exists IMPORTING iv_customer_id   TYPE string
-                            RETURNING VALUE(rv_exists) TYPE abap_bool,
-      check_technician_exists IMPORTING iv_technician_id TYPE string
-                              RETURNING VALUE(rv_exists) TYPE abap_bool,
-      check_order_exists IMPORTING iv_work_order_id TYPE string
-                         RETURNING VALUE(rv_exists) TYPE abap_bool,
 
-      check_order_history IMPORTING iv_work_order_id TYPE string
-                          RETURNING VALUE(rv_exists) TYPE abap_bool,
-      check_priority_valid IMPORTING iv_priority      TYPE c
-                           RETURNING VALUE(rv_exists) TYPE abap_bool,
-      check_status_valid  IMPORTING iv_status        TYPE ty_char2
-                          RETURNING VALUE(rv_exists) TYPE abap_bool,
-      execute_query IMPORTING iv_table         TYPE string
-                              iv_field         TYPE string
-                              iv_code          TYPE string
-                    RETURNING VALUE(rv_exists) TYPE abap_bool
-                    RAISING   cx_sy_sql_error.
+    METHODS check_customer_exists IMPORTING iv_customer_id   TYPE string
+                                  RETURNING VALUE(rv_exists) TYPE abap_bool.
+
+    METHODS check_technician_exists IMPORTING iv_technician_id TYPE string
+                                    RETURNING VALUE(rv_exists) TYPE abap_bool.
+
+    METHODS check_order_exists IMPORTING iv_work_order_id TYPE string
+                               RETURNING VALUE(rv_exists) TYPE abap_bool.
+
+    METHODS check_order_history IMPORTING iv_work_order_id TYPE string
+                                RETURNING VALUE(rv_exists) TYPE abap_bool.
+
+    METHODS check_priority_valid IMPORTING iv_priority      TYPE c
+                                 RETURNING VALUE(rv_exists) TYPE abap_bool.
+
+    METHODS check_status_valid IMPORTING iv_status        TYPE ty_char2
+                               RETURNING VALUE(rv_exists) TYPE abap_bool.
+
+    METHODS execute_query IMPORTING iv_table         TYPE string
+                                    iv_field         TYPE string
+                                    iv_code          TYPE string
+                          RETURNING VALUE(rv_exists) TYPE abap_bool
+                          RAISING   cx_sy_sql_error.
 ENDCLASS.
 
 
 
-CLASS zcl_work_oder_validator_as IMPLEMENTATION.
+CLASS zcl_work_order_validator_as IMPLEMENTATION.
   METHOD validate_create_order.
     " Check if customer exists
     DATA(lv_customer_exists) = check_customer_exists( iv_customer_id ).
@@ -143,25 +146,13 @@ CLASS zcl_work_oder_validator_as IMPLEMENTATION.
   ENDMETHOD.
 
 
-
   METHOD check_customer_exists.
 
-    SELECT SINGLE
-    FROM zdt_customer_as
-    FIELDS: customer_id
-    WHERE customer_id  = @iv_customer_id
-    INTO @DATA(ls_customer_as).
-
-    IF sy-subrc = 0.
-      rv_exists = abap_true.
-    ELSE.
-      rv_exists = abap_false.
-    ENDIF.
-
-
+    lv_code = iv_customer_id.
+    rv_exists = execute_query( iv_table = 'zdt_customer_as'
+                               iv_field = 'customer_id'
+                               iv_code =  lv_code ).
   ENDMETHOD.
-
-
 
 
   METHOD check_technician_exists.
@@ -206,14 +197,27 @@ CLASS zcl_work_oder_validator_as IMPLEMENTATION.
     CONSTANTS entry_exists TYPE abap_bool VALUE abap_true.
     DATA(iv_condition) = |{ iv_field } = { iv_code }|.
     TRY.
+        iv_condition =
+          cl_abap_dyn_prg=>check_column_name(
+            val = iv_condition
+            strict = abap_true ).
+      CATCH cx_abap_invalid_name INTO DATA(lx_abap_invalid_name).
+        RAISE SHORTDUMP TYPE cx_abap_invalid_name EXPORTING previous = lx_abap_invalid_name..
+        "handle exception
+    ENDTRY.
+
+    TRY.
         SELECT SINGLE
         FROM (iv_table)
         FIELDS: @entry_exists
         WHERE  (iv_condition)
         INTO @DATA(lv_exists).
-      CATCH cx_sy_dynamic_osql_syntax cx_sy_dynamic_osql_semantics cx_sy_dynamic_osql_error   INTO DATA(lx_dynamic_osql).
-        rv_exists = abap_false.
-        RETURN.
+      CATCH cx_sy_dynamic_osql_syntax  INTO DATA(lx_dynamic_osq_syntax).
+        RAISE SHORTDUMP TYPE cx_sy_dynamic_osql_syntax EXPORTING previous = lx_dynamic_osq_syntax.
+      CATCH cx_sy_dynamic_osql_semantics  INTO DATA(lx_dynamic_osql_semantics).
+        RAISE SHORTDUMP TYPE cx_sy_dynamic_osql_syntax EXPORTING previous = lx_dynamic_osql_semantics.
+      CATCH cx_sy_dynamic_osql_error   INTO DATA(lx_dynamic_osql_error).
+        RAISE SHORTDUMP TYPE cx_sy_dynamic_osql_syntax EXPORTING previous = lx_dynamic_osql_error.
     ENDTRY.
 
 
