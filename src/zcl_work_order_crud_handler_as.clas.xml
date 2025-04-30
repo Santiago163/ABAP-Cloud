@@ -1,4 +1,33 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
- <asx:abap version="1.0" xmlns:asx="http://www.sap.com/abapxml"/>
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <TPOOL>
+    <item>
+     <ID>I</ID>
+     <KEY>011</KEY>
+     <ENTRY>Error at creation order:</ENTRY>
+     <LENGTH>50</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>012</KEY>
+     <ENTRY>Work order generated succesfully:</ENTRY>
+     <LENGTH>66</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>013</KEY>
+     <ENTRY>The work order was not able to be generated:</ENTRY>
+     <LENGTH>88</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>014</KEY>
+     <ENTRY>Unable to find work order :</ENTRY>
+     <LENGTH>54</LENGTH>
+    </item>
+   </TPOOL>
+  </asx:values>
+ </asx:abap>
 </abapGit>
