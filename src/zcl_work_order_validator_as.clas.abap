@@ -11,11 +11,9 @@ CLASS zcl_work_order_validator_as DEFINITION
                             EXPORTING rv_message       TYPE string
                             RETURNING VALUE(rv_valid)  TYPE abap_bool,
       validate_update_order IMPORTING iv_work_order_id TYPE zde_work_order_id_as
-                                      iv_status        TYPE zde_status_as
                             EXPORTING rv_message       TYPE string
                             RETURNING VALUE(rv_valid)  TYPE abap_bool,
       validate_delete_order IMPORTING iv_work_order_id TYPE zde_work_order_id_as
-                                      iv_status        TYPE zde_status_as
                             EXPORTING rv_message       TYPE string
                             RETURNING VALUE(rv_valid)  TYPE abap_bool,
       validate_status_and_priority IMPORTING iv_status       TYPE zde_status_as
@@ -89,24 +87,25 @@ CLASS zcl_work_order_validator_as IMPLEMENTATION.
     ENDIF.
 
     " Check if the work order status exists and is valid
-    rv_valid = check_status_valid( iv_status ).
-    IF rv_valid = abap_false.
-      rv_message = | { TEXT-005 } { iv_status }|.
-      RETURN.
-    ENDIF.
 
-    " Check if the order status is editable (e.g., Pending)
-
-    IF iv_status NE 'PE'.
+    DATA(lo_work_order) = NEW zcl_work_order_crud_handler_as( ).
+    lo_work_order->read_work_order(  EXPORTING iv_work_order_id = iv_work_order_id
+                                     IMPORTING rv_result   = rv_valid
+                                               rv_message  = rv_message
+                                               rv_work_order  = DATA(ls_work_order)    ).
+    " Check if the order status is "PE" (Pending)
+    IF ls_work_order-status NE 'PE'.
       rv_valid = abap_false.
-      rv_message = | { TEXT-006 } { iv_status }|.
+      rv_message = | { TEXT-007 } { ls_work_order-status }|.
       RETURN.
     ENDIF.
+
 
     rv_valid = abap_true.
   ENDMETHOD.
 
   METHOD validate_delete_order.
+
     " Check if the order exists
     rv_valid = check_order_exists( iv_work_order_id ).
     IF rv_valid = abap_false.
@@ -114,10 +113,15 @@ CLASS zcl_work_order_validator_as IMPLEMENTATION.
       RETURN.
     ENDIF.
 
+    DATA(lo_work_order) = NEW zcl_work_order_crud_handler_as( ).
+    lo_work_order->read_work_order(  EXPORTING iv_work_order_id = iv_work_order_id
+                                     IMPORTING rv_result   = rv_valid
+                                               rv_message  = rv_message
+                                               rv_work_order  = DATA(ls_work_order)    ).
     " Check if the order status is "PE" (Pending)
-    IF iv_status NE 'PE'.
+    IF ls_work_order-status NE 'PE'.
       rv_valid = abap_false.
-      rv_message = | { TEXT-007 } { iv_status }|.
+      rv_message = | { TEXT-007 } { ls_work_order-status }|.
       RETURN.
     ENDIF.
 
@@ -199,7 +203,7 @@ CLASS zcl_work_order_validator_as IMPLEMENTATION.
   METHOD execute_query.
 
     CONSTANTS entry_exists TYPE abap_bool VALUE abap_true.
-    DATA(iv_condition) = |{ iv_field } = { iv_code }|.
+    DATA(iv_condition) = |{ iv_field } = '{ iv_code }'|.
     TRY.
         iv_condition =
           cl_abap_dyn_prg=>check_column_name(

@@ -2,6 +2,15 @@
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
+   <VSEOCLASS>
+    <CLSNAME>ZCL_WORK_ORDER_CRUD_HANDLER_AS</CLSNAME>
+    <LANGU>E</LANGU>
+    <DESCRIPT>Maneja las operaciones CRUD</DESCRIPT>
+    <STATE>1</STATE>
+    <CLSCCINCL>X</CLSCCINCL>
+    <FIXPT>X</FIXPT>
+    <UNICODE>X</UNICODE>
+   </VSEOCLASS>
    <TPOOL>
     <item>
      <ID>I</ID>
@@ -26,6 +35,18 @@
      <KEY>014</KEY>
      <ENTRY>Unable to find work order :</ENTRY>
      <LENGTH>54</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>015</KEY>
+     <ENTRY>Database Error :</ENTRY>
+     <LENGTH>27</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>016</KEY>
+     <ENTRY>Could not delete work order :</ENTRY>
+     <LENGTH>60</LENGTH>
     </item>
    </TPOOL>
   </asx:values>
