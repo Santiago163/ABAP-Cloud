@@ -205,10 +205,9 @@ CLASS zcl_work_order_validator_as IMPLEMENTATION.
     CONSTANTS entry_exists TYPE abap_bool VALUE abap_true.
     DATA(iv_condition) = |{ iv_field } = '{ iv_code }'|.
     TRY.
-        iv_condition =
-          cl_abap_dyn_prg=>check_column_name(
-            val = iv_condition
-            strict = abap_true ).
+        cl_abap_dyn_prg=>check_column_name(
+          val = iv_field
+          strict = abap_true ).
       CATCH cx_abap_invalid_name INTO DATA(lx_abap_invalid_name).
         RAISE SHORTDUMP TYPE cx_abap_invalid_name EXPORTING previous = lx_abap_invalid_name..
         "handle exception
