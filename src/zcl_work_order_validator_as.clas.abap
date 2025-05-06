@@ -5,6 +5,7 @@ CLASS zcl_work_order_validator_as DEFINITION
 
   PUBLIC SECTION.
     METHODS:
+
       validate_create_order IMPORTING iv_customer_id   TYPE zde_customer_id_as
                                       iv_technician_id TYPE zde_technician_id_as
                                       iv_priority      TYPE zde_priority_as
@@ -52,7 +53,10 @@ ENDCLASS.
 
 
 CLASS zcl_work_order_validator_as IMPLEMENTATION.
+
   METHOD validate_create_order.
+    " Valida que el cliente, el técnico y la prioridad sean correctos antes de permitir la creacion de una orden de trabajo.
+
     " Check if customer exists
     rv_valid = check_customer_exists( iv_customer_id ).
     IF rv_valid = abap_false.
@@ -78,6 +82,7 @@ CLASS zcl_work_order_validator_as IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD validate_update_order.
+    "Asegura que una orden de trabajo pueda ser actualizada solo si existe y su estado es válido para la modificación.
 
     " Check if the work order exists
     rv_valid = check_order_exists( iv_work_order_id ).
@@ -105,6 +110,7 @@ CLASS zcl_work_order_validator_as IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD validate_delete_order.
+    "Verifica que solo se puedan eliminar las órdenes de trabajo en estado pendiente y sin historial de modificaciones.
 
     " Check if the order exists
     rv_valid = check_order_exists( iv_work_order_id ).
@@ -136,6 +142,7 @@ CLASS zcl_work_order_validator_as IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD validate_status_and_priority.
+    " Valida que los valores de estado y prioridad de una orden sean correctos.
 
     " Validate the status value
     rv_valid = check_status_valid( iv_status ).
@@ -173,6 +180,7 @@ CLASS zcl_work_order_validator_as IMPLEMENTATION.
 
 
   METHOD check_order_exists.
+
     lv_code = iv_work_order_id.
     rv_exists = execute_query( iv_table = 'zdt_work_order_a'
                                iv_field = 'work_order_id'
@@ -180,6 +188,7 @@ CLASS zcl_work_order_validator_as IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD check_order_history.
+
     lv_code = iv_work_order_id.
     rv_exists = execute_query( iv_table = 'zdt_work_ord_h_a'
                                iv_field = 'history_id'
@@ -187,6 +196,7 @@ CLASS zcl_work_order_validator_as IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD check_priority_valid.
+
     lv_code = iv_priority.
     rv_exists = execute_query( iv_table = 'zdt_priority_as'
                                iv_field = 'priority'
@@ -194,6 +204,7 @@ CLASS zcl_work_order_validator_as IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD check_status_valid.
+
     lv_code = iv_status.
     rv_exists = execute_query( iv_table = 'zdt_status_as'
                                iv_field = 'status_code'
@@ -201,6 +212,8 @@ CLASS zcl_work_order_validator_as IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD execute_query.
+  "Ejecuta consultas a la base de datos utilizando programación dinámica
+  "La clase CL_ABAP_DYN_PRG en ABAP Cloud se utiliza para validar nombres de tablas en consultas dinámicas y evitar riesgos de SQL Injection
 
     CONSTANTS entry_exists TYPE abap_bool VALUE abap_true.
     DATA(iv_condition) = |{ iv_field } = '{ iv_code }'|.

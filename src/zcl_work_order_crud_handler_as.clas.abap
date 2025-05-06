@@ -5,6 +5,7 @@ CLASS zcl_work_order_crud_handler_as DEFINITION
 
   PUBLIC SECTION.
     METHODS:
+    " No se solicita la fecha de cración porque se utiliza la fecha del sistema por defecto.
       create_work_order IMPORTING iv_work_order_id TYPE zde_work_order_id_as
                                   iv_customer_id   TYPE zde_customer_id_as
                                   iv_technician_id TYPE zde_technician_id_as
@@ -19,6 +20,7 @@ CLASS zcl_work_order_crud_handler_as DEFINITION
                                 rv_message       TYPE string
                                 rv_work_order    TYPE zdt_work_order_a,
 
+    " No se solicita la fecha de cración porque se utiliza la fecha del sistema por defecto.
       update_work_order IMPORTING iv_work_order_id TYPE zde_work_order_id_as
                                   iv_customer_id   TYPE zde_customer_id_as
                                   iv_technician_id TYPE zde_technician_id_as
@@ -43,7 +45,7 @@ ENDCLASS.
 CLASS zcl_work_order_crud_handler_as IMPLEMENTATION.
 
   METHOD create_work_order.
-
+    "Realiza la validación y crea una nueva orden de trabajo si es válida.
     DATA: ls_work_order TYPE zdt_work_order_a.
 
     DATA(lo_work_order) = NEW zcl_work_order_validator_as( ).
@@ -84,6 +86,8 @@ CLASS zcl_work_order_crud_handler_as IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD read_work_order.
+    "Lee los detalles de una orden de trabajo existente.
+
     SELECT SINGLE FROM zdt_work_order_a
     FIELDS *
     WHERE work_order_id = @iv_work_order_id
@@ -102,7 +106,7 @@ CLASS zcl_work_order_crud_handler_as IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD delete_work_order.
-
+    "Elimina una orden de trabajo si cumple con los requisitos de validación.
     DATA(lo_work_order) = NEW zcl_work_order_validator_as( ).
 
     IF lo_work_order->validate_delete_order( EXPORTING iv_work_order_id   = iv_work_order_id
@@ -134,6 +138,8 @@ CLASS zcl_work_order_crud_handler_as IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD update_work_order.
+  "Realiza una actualización de una orden de trabajo, validando antes de la modificación.
+
     DATA lv_changes TYPE string.
     DATA lt_set     TYPE TABLE OF string.
     DATA lt_parameter TYPE if_abap_lock_object=>tt_parameter.
@@ -169,6 +175,8 @@ CLASS zcl_work_order_crud_handler_as IMPLEMENTATION.
     IF sy-subrc <> 0.
       RETURN.
     ENDIF.
+
+"La clase CL_ABAP_DYN_PRG en ABAP Cloud se utiliza para validar nombres de tablas en consultas dinámicas y evitar riesgos de SQL Injection
 
     IF ls_work_order-customer_id <> iv_customer_id.
       lv_changes = | { ` ` } Customer Before : { ls_work_order-customer_id }    After : { iv_customer_id } |.

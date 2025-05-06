@@ -16,10 +16,7 @@ CLASS zcl_work_order_crud_test_as DEFINITION
           rv_message TYPE string.
     METHODS initial_data IMPORTING output  TYPE REF TO if_oo_adt_classrun_out.
 
-
 ENDCLASS.
-
-
 
 CLASS zcl_work_order_crud_test_as IMPLEMENTATION.
 
@@ -33,6 +30,7 @@ CLASS zcl_work_order_crud_test_as IMPLEMENTATION.
     test_update_work_order( output = out ).
 
   ENDMETHOD.
+
   METHOD initial_data.
 
 
@@ -68,7 +66,7 @@ CLASS zcl_work_order_crud_test_as IMPLEMENTATION.
     lo_work_order->create_work_order( EXPORTING iv_work_order_id = lv_work_order
                                                 iv_customer_id = '00001001'
                                                 iv_technician_id = 'T001'
-                                                iv_priority = 'c'
+                                                iv_priority = 'B'
                                                 iv_description = 'Maintennance request'
                                       IMPORTING rv_result      = rv_result
                                                 rv_message     = rv_message ).
@@ -101,7 +99,7 @@ CLASS zcl_work_order_crud_test_as IMPLEMENTATION.
     SELECT  FROM zdt_work_order_a
     FIELDS *
     INTO TABLE @DATA(lt_work_order).
-    output->write( lt_work_order ).
+    output->write( name = 'WORK ORDER GENERATED ' data = lt_work_order ).
 
 
   ENDMETHOD.
@@ -120,7 +118,7 @@ CLASS zcl_work_order_crud_test_as IMPLEMENTATION.
     SELECT  FROM zdt_work_order_a
     FIELDS *
     INTO TABLE @DATA(lt_work_order).
-    output->write( lt_work_order ).
+    output->write( name = 'DELETE WORK ORDER' DATA = lt_work_order ).
 
   ENDMETHOD.
 
@@ -134,7 +132,7 @@ CLASS zcl_work_order_crud_test_as IMPLEMENTATION.
     IF rv_result = abap_false.
       output->write( rv_message ).
     ELSE.
-      output->write( ls_work_order ).
+      output->write( name = 'READ WORK ORDER' data = ls_work_order ).
     ENDIF.
 
   ENDMETHOD.
@@ -158,13 +156,13 @@ CLASS zcl_work_order_crud_test_as IMPLEMENTATION.
       FIELDS *
       WHERE work_order_id = @lv_work_order
       INTO @DATA(ls_work_order).
-      output->write( ls_work_order ).
+      output->write( name = 'UPDATE WORK ORDER' DATA = ls_work_order ).
 
       SELECT FROM zdt_work_ord_h_a
       FIELDS *
       WHERE work_order_id = @lv_work_order
       INTO TABLE @DATA(lt_work_order).
-      output->write( lt_work_order ).
+      output->write( name = 'CHANGE LOG' DATA = lt_work_order ).
 
     ENDIF.
 
