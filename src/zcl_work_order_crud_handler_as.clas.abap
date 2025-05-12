@@ -235,7 +235,7 @@ CLASS zcl_work_order_crud_handler_as IMPLEMENTATION.
     ENDTRY.
 
     TRY.
-        lo_block_order->enqueue(
+        lo_block_order->enqueue(                                 "Bloqueo
 *      it_table_mode =
       it_parameter  = lt_parameter
 *      _scope        =
@@ -285,7 +285,7 @@ CLASS zcl_work_order_crud_handler_as IMPLEMENTATION.
         CATCH cx_sy_open_sql_db INTO DATA(lx_sql_db_i).
           rv_message = | { TEXT-020 } { iv_work_order_id }{ lx_sql_db_i->get_text( ) }|.
           rv_result = abap_false.
-          ROLLBACK WORK.
+          ROLLBACK WORK.                                  "Deshace todos los cambios
           TRY.
               lo_block_order->dequeue(
              it_parameter  = lt_parameter   ).
@@ -300,14 +300,14 @@ CLASS zcl_work_order_crud_handler_as IMPLEMENTATION.
       IF sy-subrc = 0.
         CLEAR rv_message.
         rv_result = abap_true.
-        COMMIT WORK.
+        COMMIT WORK.                                       "Compromete los cambios
       ELSE.
         rv_message = | { TEXT-018 } { iv_work_order_id }|.
         rv_result = abap_false.
         ROLLBACK WORK.
       ENDIF.
       TRY.
-          lo_block_order->dequeue(
+          lo_block_order->dequeue(                                                  "Desbloqueo
          it_parameter  = lt_parameter   ).
         CATCH cx_abap_lock_failure INTO lx_dequeue.
           rv_message = | { TEXT-024 } { iv_work_order_id }{ lx_dequeue->get_text( ) }|.

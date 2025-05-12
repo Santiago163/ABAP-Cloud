@@ -13,7 +13,10 @@ CLASS zcl_work_order_crud_test_as DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
     DATA: rv_result  TYPE abap_bool,
-          rv_message TYPE string.
+          rv_message TYPE string,
+          lv_user    TYPE zde_user_as.
+
+
     METHODS initial_data IMPORTING output  TYPE REF TO if_oo_adt_classrun_out.
 
 ENDCLASS.
@@ -63,6 +66,20 @@ CLASS zcl_work_order_crud_test_as IMPLEMENTATION.
 
     DATA lv_work_order TYPE zde_work_order_id VALUE '0001' .
     DATA(lo_work_order) = NEW zcl_work_order_crud_handler_as(  ).
+    lv_user = sy-uname.
+
+    AUTHORITY-CHECK OBJECT 'ZAO_USER_A'
+      ID 'ZAF_USER_A' FIELD lv_user
+      ID 'ACTVT' FIELD '01'. " 01 = CREAR
+
+    IF sy-subrc NE 0.
+      rv_result = abap_false.
+      rv_message = | { TEXT-001 } { lv_user } |.
+      output->write( rv_message ).
+*      RETURN.                 Toggle comment on due to the authorization object (ZAO_USER_A) is not assigned
+    ENDIF.
+
+
     lo_work_order->create_work_order( EXPORTING iv_work_order_id = lv_work_order
                                                 iv_customer_id = '00001001'
                                                 iv_technician_id = 'T001'
@@ -107,6 +124,19 @@ CLASS zcl_work_order_crud_test_as IMPLEMENTATION.
   METHOD test_delete_work_order.
     DATA lv_work_order TYPE zde_work_order_id VALUE '0001' .
     DATA(lo_work_order) = NEW zcl_work_order_crud_handler_as(  ).
+    lv_user = sy-uname.
+
+    AUTHORITY-CHECK OBJECT 'ZAO_USER_A'
+      ID 'ZAF_USER_A' FIELD lv_user
+      ID 'ACTVT' FIELD '06'. " 06 = BORRAR
+
+    IF sy-subrc NE 0.
+      rv_result = abap_false.
+      rv_message = | { TEXT-002 } { lv_user } |.
+      output->write( rv_message ).
+*      RETURN.                 Toggle comment on due to the authorization object (ZAO_USER_A) is not assigned
+    ENDIF.
+
     lo_work_order->delete_work_order( EXPORTING iv_work_order_id = lv_work_order
                                       IMPORTING rv_result = rv_result
                                                 rv_message = rv_message ).
@@ -118,13 +148,26 @@ CLASS zcl_work_order_crud_test_as IMPLEMENTATION.
     SELECT  FROM zdt_work_order_a
     FIELDS *
     INTO TABLE @DATA(lt_work_order).
-    output->write( name = 'DELETE WORK ORDER' DATA = lt_work_order ).
+    output->write( name = 'DELETE WORK ORDER' data = lt_work_order ).
 
   ENDMETHOD.
 
   METHOD test_read_work_order.
     DATA lv_work_order TYPE zde_work_order_id VALUE '0002' .
     DATA(lo_work_order) = NEW zcl_work_order_crud_handler_as(  ).
+    lv_user = sy-uname.
+
+    AUTHORITY-CHECK OBJECT 'ZAO_USER_A'
+      ID 'ZAF_USER_A' FIELD lv_user
+      ID 'ACTVT' FIELD '03'. " 01 = LEER
+
+    IF sy-subrc NE 0.
+      rv_result = abap_false.
+      rv_message = | { TEXT-003 } { lv_user } |.
+      output->write( rv_message ).
+*      RETURN.                 Toggle comment on due to the authorization object (ZAO_USER_A) is not assigned
+    ENDIF.
+
     lo_work_order->read_work_order( EXPORTING iv_work_order_id = lv_work_order
                                     IMPORTING rv_result = rv_result
                                               rv_message = rv_message
@@ -140,6 +183,19 @@ CLASS zcl_work_order_crud_test_as IMPLEMENTATION.
   METHOD test_update_work_order.
     DATA lv_work_order TYPE zde_work_order_id VALUE '0003' .
     DATA(lo_work_order) = NEW zcl_work_order_crud_handler_as(  ).
+    lv_user = sy-uname.
+
+    AUTHORITY-CHECK OBJECT 'ZAO_USER_A'
+      ID 'ZAF_USER_A' FIELD lv_user
+      ID 'ACTVT' FIELD '02'. " 02 = UPDATE
+
+    IF sy-subrc NE 0.
+      rv_result = abap_false.
+      rv_message = | { TEXT-004 } { lv_user } |.
+      output->write( rv_message ).
+*      RETURN.                 Toggle comment on due to the authorization object (ZAO_USER_A) is not assigned
+    ENDIF.
+
     lo_work_order->update_work_order( EXPORTING  iv_work_order_id = lv_work_order
                                                   iv_customer_id  = '1004'
                                                   iv_technician_id = 'T004'
@@ -156,13 +212,13 @@ CLASS zcl_work_order_crud_test_as IMPLEMENTATION.
       FIELDS *
       WHERE work_order_id = @lv_work_order
       INTO @DATA(ls_work_order).
-      output->write( name = 'UPDATE WORK ORDER' DATA = ls_work_order ).
+      output->write( name = 'UPDATE WORK ORDER' data = ls_work_order ).
 
       SELECT FROM zdt_work_ord_h_a
       FIELDS *
       WHERE work_order_id = @lv_work_order
       INTO TABLE @DATA(lt_work_order).
-      output->write( name = 'CHANGE LOG' DATA = lt_work_order ).
+      output->write( name = 'CHANGE LOG' data = lt_work_order ).
 
     ENDIF.
 
